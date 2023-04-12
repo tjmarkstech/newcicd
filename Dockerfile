@@ -1,16 +1,14 @@
-FROM ubuntu:20.04
+# Use the official CentOS 7 base image
+FROM centos:centos7
 
-ENV CONTAINER_TIMEZONE="Europe/Brussels"
-RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
+# Install the Apache HTTP server package from the CentOS repository
+RUN yum install httpd -y
 
-RUN apt update && apt install -y apache2
+# Copy the index.html file from the Docker build context to the default Apache document root directory in the container
+COPY index.html /var/www/html/
 
-ENV APACHE_RUN_USER www-data
-ENV APACHE_RUN_GROUP www-data
-ENV APACHE_LOG_DIR /var/log/apache2
-ENV APACHE_RUN_DIR /var/www/html
+# Specify the command to run when the container starts, which starts the Apache HTTP server in the foreground
+CMD ["/usr/sbin/httpd","-D","FOREGROUND"]
 
-RUN echo 'Hello, docker' > /var/www/index.html
-
-ENTRYPOINT ["/usr/sbin/apache2"]
-CMD ["-D", "FOREGROUND"
+# Expose port 80 to allow incoming HTTP traffic to the container
+EXPOSE 80
